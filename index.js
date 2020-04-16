@@ -1,4 +1,4 @@
-const html = (variantAPIs) => `
+const html = (variantURLs) => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -11,25 +11,53 @@ const html = (variantAPIs) => `
   <body class="jumbotron">
     <div class="container">
       <div class="display-3">
-        <h1 class="">Explore Cloudflare APIs with Zhe! </h1>
-        <div class="flex">
+        <h2 class="">Explore Cloudflare APIs with Zhe! </h2>
+        <hr>
+        <br>
+        <div class="flex" id="urlsDiv" style="display: block">
           <div class="alert alert-success" role="alert" style="font-size: 18px">
           <span class="badge badge-light">Your URL: &nbsp</span>
             https://cfw-takehome.developers.workers.dev/api/variants
           </div>
           <button class="btn btn-success" id="fetchBtn">Go Fetch</button>
         </div>
-        <div class="mt-4" id="mylist"></div>
+        <div class="container" id="variantsDiv" style="display: none">
+          <div style="margin-bottom: 3%">
+            <button type="button" class="btn btn-secondary" id="backBtn">Back</button>
+            
+          </div>
+          <div class="container">
+            <div class="row" id="variantRow">
+              
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
   <script>
-    window.variantAPIs = ${variantAPIs};
+    window.variantURLs = ${variantURLs};
+    
     var getData = function() {
       alert('/???');
-      console.log(window.variantAPIs);
+      console.log(variantURLs[0] + " and " + variantURLs[1]);
+      document.querySelector("#variantsDiv").style.display = "block";
+      document.querySelector("#urlsDiv").style.display = "none";
+      window.variantURLs.forEach(variant=>{
+        var ele = document.createElement("div")
+        ele.className = "col"
+        ele.innerHTML=variant;
+        ele.style.fontSize = "18px";
+        document.querySelector("#variantRow").appendChild(ele);
+      });
+      
     };
-    document.querySelector("#fetchBtn").addEventListener('click', getData)
+    var backAction = function() {
+      document.querySelector("#variantsDiv").style.display = "none";
+      document.querySelector("#urlsDiv").style.display = "block";
+    }
+    document.querySelector("#fetchBtn").addEventListener('click', getData);
+    document.querySelector("#backBtn").addEventListener('click', backAction);
   </script>
 </html>
 `;
@@ -56,9 +84,9 @@ async function handleRequest(request, data = {}) {
     });
     var resp = await fetch(myRequest);
     var jsondata = await resp.json();
-    var variantAPIs = jsondata.variants;
-    var body = html(JSON.stringify(variantAPIs));
-    console.log(variantAPIs);
+    var variantURLs = jsondata.variants;
+    var body = html(JSON.stringify(variantURLs));
+    console.log(variantURLs);
     return new Response(body, { headers: headers });
   } catch (e) {
     return new Response(`Something went wrong ${e}`, { status: 404 });
