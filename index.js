@@ -1,34 +1,66 @@
-const html = `
+const html = (variantAPIs) => `
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Cloudflare internship project</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet"></link>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
   </head>
-  <body class="bg-green-200">
-    <div class="w-full h-full flex content-center justify-center mt-8">
-      <div class="bg-white shadow-md rounded px-8 pt-6 py-8 mb-4">
-        <h1 class="block text-grey-800 text-md font-bold mb-2">API</h1>
+  <body class="jumbotron">
+    <div class="container">
+      <div class="display-3">
+        <h1 class="">Explore Cloudflare APIs with Zhe! </h1>
         <div class="flex">
-          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-800 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" placeholder="Your url here"></input>
-          <button class="bg-green-500 hover:bg-green-800 text-white font-bold ml-2 py-2 px-4 rounded focus:outline-none focus:shadow-outline" id="create" type="submit">Generate</button>
+          <div class="alert alert-success" role="alert" style="font-size: 18px">
+          <span class="badge badge-light">Your URL: &nbsp</span>
+            https://cfw-takehome.developers.workers.dev/api/variants
+          </div>
+          <button class="btn btn-success" id="fetchBtn">Go Fetch</button>
         </div>
         <div class="mt-4" id="mylist"></div>
       </div>
     </div>
   </body>
+  <script>
+    window.variantAPIs = ${variantAPIs};
+    var getData = function() {
+      alert('/???');
+      console.log(window.variantAPIs);
+    };
+    document.querySelector("#fetchBtn").addEventListener('click', getData)
+  </script>
 </html>
 `;
+
+const url = "https://cfw-takehome.developers.workers.dev/api/variants";
 
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
 /**
- * Respond with hello worker text
+ * Fetch a request and follow redirects
  * @param {Request} request
  */
-async function handleRequest(request) {
-  return new Response(html, { headers: { "content-type": "text/html" } });
+async function handleRequest(request, data = {}) {
+  let headers = new Headers({
+    "Content-Type": "text/html",
+    "Access-Control-Allow-Origin": "*",
+  });
+
+  try {
+    var myRequest = new Request(url, {
+      method: "GET",
+      headers: headers,
+    });
+    var resp = await fetch(myRequest);
+    var jsondata = await resp.json();
+    var variantAPIs = jsondata.variants;
+    var body = html(JSON.stringify(variantAPIs));
+    console.log(variantAPIs);
+    return new Response(body, { headers: headers });
+  } catch (e) {
+    return new Response(`Something went wrong ${e}`, { status: 404 });
+  }
 }
