@@ -40,7 +40,7 @@ const html = (variantURLs) => `
     
     var getData = function() {
       alert('/???');
-      console.log(variantURLs[0] + " and " + variantURLs[1]);
+      // console.log(variantURLs[0] + " and " + variantURLs[1]);
       document.querySelector("#variantsDiv").style.display = "block";
       document.querySelector("#urlsDiv").style.display = "none";
       window.variantURLs.forEach(variant=>{
@@ -62,11 +62,12 @@ const html = (variantURLs) => `
 </html>
 `;
 
-const url = "https://cfw-takehome.developers.workers.dev/api/variants";
-
+const api = "https://cfw-takehome.developers.workers.dev/api/variants";
+var urlHTMLs = [];
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
+
 /**
  * Fetch a request and follow redirects
  * @param {Request} request
@@ -78,15 +79,25 @@ async function handleRequest(request, data = {}) {
   });
 
   try {
-    var myRequest = new Request(url, {
+    var myRequest = new Request(api, {
       method: "GET",
       headers: headers,
     });
-    var resp = await fetch(myRequest);
-    var jsondata = await resp.json();
-    var variantURLs = jsondata.variants;
-    var body = html(JSON.stringify(variantURLs));
-    console.log(variantURLs);
+    let resp = await fetch(myRequest);
+
+    let jsondata = await resp.json();
+    let variantURLs = jsondata.variants;
+    for (let i = 0; i < variantURLs.length; i++) {
+      try {
+        let response = await fetch(variantURLs[i]);
+        let urlHTML = await response.text();
+        urlHTMLs.push(urlHTML);
+      } catch (e) {
+        console.log(e.message);
+      }
+    }
+    console.log(urlHTMLs);
+    var body = html(JSON.stringify(urlHTMLs));
     return new Response(body, { headers: headers });
   } catch (e) {
     return new Response(`Something went wrong ${e}`, { status: 404 });
