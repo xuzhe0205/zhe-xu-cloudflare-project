@@ -62,8 +62,28 @@ const html = (variantURLs) => `
 </html>
 `;
 
+class AttributeRewriter {
+  constructor(attributeName) {
+    this.attributeName = attributeName;
+  }
+
+  element(element) {
+    const attribute = element.getAttribute(this.attributeName);
+    if (attribute) {
+      console.log("yes?");
+      varientResult.push(element.textContent);
+      console.log(element.textContent);
+      // element.setAttribute(
+      //   this.attributeName,
+      //   attribute.replace("myolddomain.com", "mynewdomain.com")
+      // );
+    }
+  }
+}
+
 const api = "https://cfw-takehome.developers.workers.dev/api/variants";
 var urlHTMLs = [];
+var varientResult = [];
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
@@ -87,16 +107,39 @@ async function handleRequest(request, data = {}) {
 
     let jsondata = await resp.json();
     let variantURLs = jsondata.variants;
+
+    let linkHandler = {
+      element: (element) => {
+        if (element.tagName === "link") {
+          varientResult.push(element);
+          // const tag = elementToMetaTag(element);
+          // if (!!Object.keys(tag).length) matches.push(tag);
+        }
+      },
+    };
+
+    let bodyHandler = {
+      text: (text) => {
+        console.log(text.text);
+      },
+    };
+
+    let rewriter = new HTMLRewriter()
+      .on("link", linkHandler)
+      .on("h1", bodyHandler);
+
     for (let i = 0; i < variantURLs.length; i++) {
       try {
         let response = await fetch(variantURLs[i]);
+        await rewriter.transform(response).arrayBuffer();
+        // console.log(varientResult);
         let urlHTML = await response.text();
         urlHTMLs.push(urlHTML);
       } catch (e) {
         console.log(e.message);
       }
     }
-    console.log(urlHTMLs);
+
     var body = html(JSON.stringify(urlHTMLs));
     return new Response(body, { headers: headers });
   } catch (e) {
