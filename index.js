@@ -28,7 +28,6 @@ const html = (resDict) => `
           </div>
           <div class="container">
             <div class="row" id="variantRow">
-              
             </div>
           </div>
         </div>
@@ -39,21 +38,24 @@ const html = (resDict) => `
     window.resDict = ${resDict};
     console.log(window.resDict);
     var getData = function() {
-      alert('/???');
-      // console.log(variantURLs[0] + " and " + variantURLs[1]);
-      
+      console.log(window.resDict);
       document.querySelector("#variantsDiv").style.display = "block";
       document.querySelector("#urlsDiv").style.display = "none";
-      window.resDict["urlHTMLs"].forEach((variant, index)=>{
-        var linkEle = document.createElement("link");
-        linkEle.href = resDict["styleLinks"][index];
-        document.getElementsByTagName("head")[0].appendChild(linkEle);
-        var ele = document.createElement("div")
-        ele.className = "col"
-        ele.innerHTML=variant;
-        ele.style.fontSize = "18px";
-        document.querySelector("#variantRow").appendChild(ele);
-      });
+      if (document.querySelector("#variantRow").childNodes.length <= 1) {
+        window.resDict["urlHTMLs"].forEach((variant, index)=>{
+          var linkEle = document.createElement("link");
+          linkEle.href = resDict["styleLinks"][index];
+          linkEle.rel = "stylesheet"
+          document.getElementsByTagName("head")[0].appendChild(linkEle);
+          var ele = document.createElement("div")
+          ele.className = "col"
+          ele.innerHTML=variant;
+          ele.style.fontSize = "18px";
+          setTimeout(function(){document.querySelector("#variantRow").appendChild(ele);},50);
+          
+        });
+      }
+      
       
     };
     var backAction = function() {
@@ -89,6 +91,12 @@ const api = "https://cfw-takehome.developers.workers.dev/api/variants";
 var urlHTMLs = [];
 var styleLinks = [];
 var resDict = {};
+async function initParams() {
+  urlHTMLs = [];
+  styleLinks = [];
+  resDict = {};
+}
+
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
@@ -98,6 +106,7 @@ addEventListener("fetch", (event) => {
  * @param {Request} request
  */
 async function handleRequest(request, data = {}) {
+  initParams();
   let headers = new Headers({
     "Content-Type": "text/html",
     "Access-Control-Allow-Origin": "*",
@@ -126,13 +135,27 @@ async function handleRequest(request, data = {}) {
     let bodyHandler = {
       element: (element) => {
         if (
-          element.tagName === "html" ||
-          element.tagName === "head" ||
-          element.tagName === "body" ||
-          element.tagName === "link" ||
-          element.tagName === "title"
+          element.getAttribute("class") !=
+            "bg-white rounded-lg px-4 pt-5 pb-4 overflow-hidden shadow-xl transform transition-all sm:max-w-sm sm:w-full sm:p-6" &&
+          element.getAttribute("class") !=
+            "mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100" &&
+          element.getAttribute("class") != "h-6 w-6 text-green-600" &&
+          element.tagName != "path" &&
+          element.getAttribute("class") != "mt-3 text-center sm:mt-5" &&
+          element.getAttribute("class") != "mt-2" &&
+          element.getAttribute("class") != "text-sm leading-5 text-gray-500" &&
+          element.getAttribute("class") != "mt-5 sm:mt-6" &&
+          element.getAttribute("class") != "flex w-full rounded-md shadow-sm" &&
+          element.getAttribute("class") !=
+            "inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-indigo-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo transition ease-in-out duration-150 sm:text-sm sm:leading-5" &&
+          element.getAttribute("class") !=
+            "inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-indigo transition ease-in-out duration-150 sm:text-sm sm:leading-5"
         ) {
-          element.removeAndKeepContent();
+          if (element.tagName == "title") {
+            element.remove();
+          } else {
+            element.removeAndKeepContent();
+          }
           // const tag = elementToMetaTag(element);
           // if (!!Object.keys(tag).length) matches.push(tag);
         } else {
