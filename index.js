@@ -8,18 +8,18 @@ const html = (resDict) => `
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
   </head>
-  <body class="jumbotron">
+  <body class="jumbotron" style="background-color:#FFF5EE">
     <div class="container">
       <div class="display-3">
         <h2 class="">Explore Cloudflare APIs with Zhe! </h2>
         <hr>
         <br>
-        <div class="flex" id="urlsDiv" style="display: block">
-          <div class="alert alert-success" role="alert" style="font-size: 18px">
+        <div class="flex" id="urlsDiv" style="display: block; font-size: 18px">
+          <div class="alert alert-success" role="alert" >
           <span class="badge badge-light">Your URL: &nbsp</span>
             https://cfw-takehome.developers.workers.dev/api/variants
           </div>
-          <button class="btn btn-success" id="fetchBtn">Go Fetch</button>
+          <button class="btn btn-success" id="fetchBtn"><b>Go Fetch</b></button>
         </div>
         <div class="container" id="variantsDiv" style="display: none">
           <div style="margin-bottom: 3%">
@@ -36,9 +36,12 @@ const html = (resDict) => `
   </body>
   <script>
     window.resDict = ${resDict};
-    console.log(window.resDict);
-    var getData = function() {
-      console.log(window.resDict);
+    console.log(document.cookie);
+    if (document.cookie.split(';').some((item) => item.includes('status=do-ab-testing'))) {
+        getData();
+    }
+    function getData() {
+      document.cookie = "status=do-ab-testing";
       document.querySelector("#variantsDiv").style.display = "block";
       document.querySelector("#urlsDiv").style.display = "none";
       if (document.querySelector("#variantRow").childNodes.length <= 1) {
@@ -51,7 +54,7 @@ const html = (resDict) => `
           ele.className = "col"
           ele.innerHTML=variant;
           ele.style.fontSize = "18px";
-          setTimeout(function(){document.querySelector("#variantRow").appendChild(ele);},50);
+          setTimeout(function(){document.querySelector("#variantRow").appendChild(ele);},200);
           
         });
       }
@@ -68,41 +71,44 @@ const html = (resDict) => `
 </html>
 `;
 
-// class AttributeRewriter {
-//   constructor(attributeName) {
-//     this.attributeName = attributeName;
-//   }
-
-//   element(element) {
-//     const attribute = element.getAttribute(this.attributeName);
-//     if (attribute) {
-//       console.log("yes?");
-//       varientResult.push(element.textContent);
-//       console.log(element.textContent);
-//       // element.setAttribute(
-//       //   this.attributeName,
-//       //   attribute.replace("myolddomain.com", "mynewdomain.com")
-//       // );
-//     }
-//   }
-// }
-
+/**
+ * Declare global variables
+ * api: defined cloudflare api
+ * urlHTMLs: array that stores html codes from 2 urls coming from the cloudflare api
+ * styleLinks: array that stores styling links from the html codes coming from 2 urls from the cloudflare api
+ * resDict: javascript dictionary that maps urlHTMLs and styleLinks
+ * counter: counter that counts which url from the cloudflare api the HTMLRewriter is parsing during iteration
+ */
 const api = "https://cfw-takehome.developers.workers.dev/api/variants";
-var urlHTMLs = [];
-var styleLinks = [];
-var resDict = {};
+var urlHTMLs;
+var styleLinks;
+var resDict;
+var counter;
+
+/**
+ * Initializing previously declared variables: urlHTMLs, styleLinks, resDict, counter
+ * @param {}
+ */
 async function initParams() {
   urlHTMLs = [];
   styleLinks = [];
   resDict = {};
+  counter = 0;
 }
 
+/**
+ * EventListener with "fetch" keyword that exucutes the handleRequest() function
+ *
+ */
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
 
 /**
  * Fetch a request and follow redirects
+ * Firstly invokes the initParams() to initialize global variables
+ * Then uses cloudflare runtime apis such as Fetch and HTMLRewriter to fetch json data from provided api, and parse response
+ * and html code in each url from the fetched api
  * @param {Request} request
  */
 async function handleRequest(request, data = {}) {
@@ -118,16 +124,12 @@ async function handleRequest(request, data = {}) {
       headers: headers,
     });
     let resp = await fetch(myRequest);
-
     let jsondata = await resp.json();
     let variantURLs = jsondata.variants;
-
     let linkHandler = {
       element: (element) => {
         if (element.tagName === "link") {
           styleLinks.push(element.getAttribute("href"));
-          // const tag = elementToMetaTag(element);
-          // if (!!Object.keys(tag).length) matches.push(tag);
         }
       },
     };
@@ -141,6 +143,7 @@ async function handleRequest(request, data = {}) {
             "mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100" &&
           element.getAttribute("class") != "h-6 w-6 text-green-600" &&
           element.tagName != "path" &&
+          element.tagName != "title" &&
           element.getAttribute("class") != "mt-3 text-center sm:mt-5" &&
           element.getAttribute("class") != "mt-2" &&
           element.getAttribute("class") != "text-sm leading-5 text-gray-500" &&
@@ -151,25 +154,81 @@ async function handleRequest(request, data = {}) {
           element.getAttribute("class") !=
             "inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-indigo transition ease-in-out duration-150 sm:text-sm sm:leading-5"
         ) {
-          if (element.tagName == "title") {
-            element.remove();
-          } else {
-            element.removeAndKeepContent();
-          }
-          // const tag = elementToMetaTag(element);
-          // if (!!Object.keys(tag).length) matches.push(tag);
+          element.removeAndKeepContent();
         } else {
           return;
         }
       },
     };
 
+    let contentHandler = {
+      element: (element) => {
+        try {
+          if (element.tagName === "title") {
+            element.setInnerContent("Small page of variant " + counter);
+          } else if (element.tagName === "h1") {
+            if (counter == 1) {
+              element.setInnerContent(
+                "Variant " + counter + ": COVID19 Fund Donation"
+              );
+            } else {
+              element.setInnerContent(
+                "Variant " + counter + ": COVID19 Plasma Donation"
+              );
+            }
+          } else if (element.tagName === "p") {
+            element.setAttribute("style", "white-space: pre-line");
+            if (counter == 1) {
+              element.setInnerContent(
+                "This is variant " +
+                  counter +
+                  "!" +
+                  " \n " +
+                  "If you like me, donate fund to help WHO fight COVID-19 "
+              );
+            } else {
+              element.setInnerContent(
+                "This is variant " +
+                  counter +
+                  "!" +
+                  " \n " +
+                  "If you like me, donate plasma to help American Red Cross recover COVID-19 patients "
+              );
+            }
+          } else if (element.tagName === "a") {
+            if (counter == 1) {
+              element.setAttribute("href", "https://covid19responsefund.org/");
+              element.setAttribute(
+                "class",
+                "inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-yellow-500 text-base leading-6 font-medium text-white shadow-sm hover:bg-yellow-400 focus:outline-none focus:border-yellow-600 focus:shadow-outline-yellow transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              );
+              element.setInnerContent("Donate fund to WHO");
+            } else {
+              element.setAttribute(
+                "href",
+                "https://www.redcrossblood.org/donate-blood/dlp/plasma-donations-from-recovered-covid-19-patients.html"
+              );
+              element.setAttribute(
+                "class",
+                "inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-red-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-red-500 focus:outline-none focus:border-red-700 focus:shadow-outline-red transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+              );
+              element.setInnerContent("Donate plasma to American Red Cross");
+            }
+          }
+        } catch (error) {
+          console.log("content change error: ", error);
+        }
+      },
+    };
+
     let rewriter = new HTMLRewriter()
       .on("link", linkHandler)
-      .on("*", bodyHandler);
+      .on("*", bodyHandler)
+      .on("*", contentHandler);
 
     for (let i = 0; i < variantURLs.length; i++) {
       try {
+        counter = counter + 1;
         let response = await fetch(variantURLs[i]);
         response = await rewriter.transform(response);
         let urlHTML = await response.text();
@@ -180,7 +239,6 @@ async function handleRequest(request, data = {}) {
     }
     resDict["styleLinks"] = styleLinks;
     resDict["urlHTMLs"] = urlHTMLs;
-    console.log(resDict);
     var body = html(JSON.stringify(resDict));
     return new Response(body, { headers: headers });
   } catch (e) {
