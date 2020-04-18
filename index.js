@@ -1,4 +1,4 @@
-const html = (variantURLs) => `
+const html = (resDict) => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -36,14 +36,18 @@ const html = (variantURLs) => `
     </div>
   </body>
   <script>
-    window.variantURLs = ${variantURLs};
-    
+    window.resDict = ${resDict};
+    console.log(window.resDict);
     var getData = function() {
       alert('/???');
       // console.log(variantURLs[0] + " and " + variantURLs[1]);
+      
       document.querySelector("#variantsDiv").style.display = "block";
       document.querySelector("#urlsDiv").style.display = "none";
-      window.variantURLs.forEach(variant=>{
+      window.resDict["urlHTMLs"].forEach((variant, index)=>{
+        var linkEle = document.createElement("link");
+        linkEle.href = resDict["styleLinks"][index];
+        document.getElementsByTagName("head")[0].appendChild(linkEle);
         var ele = document.createElement("div")
         ele.className = "col"
         ele.innerHTML=variant;
@@ -62,28 +66,29 @@ const html = (variantURLs) => `
 </html>
 `;
 
-class AttributeRewriter {
-  constructor(attributeName) {
-    this.attributeName = attributeName;
-  }
+// class AttributeRewriter {
+//   constructor(attributeName) {
+//     this.attributeName = attributeName;
+//   }
 
-  element(element) {
-    const attribute = element.getAttribute(this.attributeName);
-    if (attribute) {
-      console.log("yes?");
-      varientResult.push(element.textContent);
-      console.log(element.textContent);
-      // element.setAttribute(
-      //   this.attributeName,
-      //   attribute.replace("myolddomain.com", "mynewdomain.com")
-      // );
-    }
-  }
-}
+//   element(element) {
+//     const attribute = element.getAttribute(this.attributeName);
+//     if (attribute) {
+//       console.log("yes?");
+//       varientResult.push(element.textContent);
+//       console.log(element.textContent);
+//       // element.setAttribute(
+//       //   this.attributeName,
+//       //   attribute.replace("myolddomain.com", "mynewdomain.com")
+//       // );
+//     }
+//   }
+// }
 
 const api = "https://cfw-takehome.developers.workers.dev/api/variants";
 var urlHTMLs = [];
-var varientResult = [];
+var styleLinks = [];
+var resDict = {};
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
@@ -111,7 +116,7 @@ async function handleRequest(request, data = {}) {
     let linkHandler = {
       element: (element) => {
         if (element.tagName === "link") {
-          varientResult.push(element);
+          styleLinks.push(element.getAttribute("href"));
           // const tag = elementToMetaTag(element);
           // if (!!Object.keys(tag).length) matches.push(tag);
         }
@@ -119,28 +124,41 @@ async function handleRequest(request, data = {}) {
     };
 
     let bodyHandler = {
-      text: (text) => {
-        console.log(text.text);
+      element: (element) => {
+        if (
+          element.tagName === "html" ||
+          element.tagName === "head" ||
+          element.tagName === "body" ||
+          element.tagName === "link" ||
+          element.tagName === "title"
+        ) {
+          element.removeAndKeepContent();
+          // const tag = elementToMetaTag(element);
+          // if (!!Object.keys(tag).length) matches.push(tag);
+        } else {
+          return;
+        }
       },
     };
 
     let rewriter = new HTMLRewriter()
       .on("link", linkHandler)
-      .on("h1", bodyHandler);
+      .on("*", bodyHandler);
 
     for (let i = 0; i < variantURLs.length; i++) {
       try {
         let response = await fetch(variantURLs[i]);
-        await rewriter.transform(response).arrayBuffer();
-        // console.log(varientResult);
+        response = await rewriter.transform(response);
         let urlHTML = await response.text();
         urlHTMLs.push(urlHTML);
       } catch (e) {
         console.log(e.message);
       }
     }
-
-    var body = html(JSON.stringify(urlHTMLs));
+    resDict["styleLinks"] = styleLinks;
+    resDict["urlHTMLs"] = urlHTMLs;
+    console.log(resDict);
+    var body = html(JSON.stringify(resDict));
     return new Response(body, { headers: headers });
   } catch (e) {
     return new Response(`Something went wrong ${e}`, { status: 404 });
