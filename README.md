@@ -30,6 +30,8 @@ To begin, install the [Wrangler](https://github.com/cloudflare/wrangler) command
 
 ### 2. Use `wrangler dev` to locally test/develop Zhe's application
 
+Business and programmatic are in `index.js`
+
 The recently launched [`wrangler dev`](https://github.com/cloudflare/wrangler#-dev) feature will allow you to begin developing your application using `localhost` - this means that you can test your project locally and make sure it works, without having to sort out deployment until later in the exercise.
 
 Note that a major benefit of using `wrangler dev` is the ability to output `console.log` statements to your terminal - this is super useful for inspecting HTTP responses and variables!
