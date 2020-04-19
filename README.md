@@ -36,13 +36,13 @@ Note that a major benefit of using `wrangler dev` is the ability to output `cons
 
 #### First page: Functioning like a welcome/main page, which inform users which URL/API we are fetching data from
 
-![FirstPage](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/First_Page.png)
+![FirstPage](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/First_page.png)
 
 #### By clicking `Go Fetch` in first page, we are now directed to the second page, where the the content from those urls from the API are now presented in a "A/B testing" style. It allows users to determine which `variant` they like. And since I made an "extra-credit" change there by making the theme "fighting COVID-19", the two urls( the content ) can actually allow users to go to designated pages to make donations
 
 #### By clicking `Back` in the second page, users can "go back"/directed to the first page
 
-![SecondPage](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/Second_Page.png)
+![SecondPage](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/Second_page.png)
 
 #### After clicking `Variant 1`, users are navigated to WHO page and able to donate funds
 
