@@ -36,20 +36,20 @@ Note that a major benefit of using `wrangler dev` is the ability to output `cons
 
 #### First page: Functioning like a welcome/main page, which inform users which URL/API we are fetching data from
 
-![First page](https://drive.google.com/uc?export=view&id=1LvJB84KfEttbeYCbh353UPddzOKmAlCR)
+![FirstPage](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/First_page.png)
 
 #### By clicking `Go Fetch` in first page, we are now directed to the second page, where the the content from those urls from the API are now presented in a "A/B testing" style. It allows users to determine which `variant` they like. And since I made an "extra-credit" change there by making the theme "fighting COVID-19", the two urls( the content ) can actually allow users to go to designated pages to make donations
 
 #### By clicking `Back` in the second page, users can "go back"/directed to the first page
 
-![Second page](https://drive.google.com/uc?export=view&id=109dLFbmVru_WpY4drbFrN0fPrVNamm6m)
+![SecondPage](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/Second_page.png)
 
 #### After clicking `Variant 1`, users are navigated to WHO page and able to donate funds
 
-![WHO page](https://drive.google.com/uc?export=view&id=1dV5KKpaDJlkz4kR-RiiUk8xjR0WIEXDY)
+![WHO Page](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/WHO.png)
 
 #### After clicking `Variant 2`, users are navigated to American Red Cross page and able to donate plasma
 
-![American Red Cross page](https://drive.google.com/uc?export=view&id=1srwOQ1s3YvIPWR1QT7dQ1zQmhht1S7Tu)
+![American Red Cross page](https://raw.githubusercontent.com/xuzhe0205/zhe-xu-cloudflare-project/master/image/American_Red_Cross.png)
 
 #### By clicking `back arrow` on the users' browsers, or simply enter address `https://zhe-xu-cloudflare-project.zhespace.workers.dev/` to return to the application page. Since I created and used `HTTP Cookies`, users are able to see the "A/B testing" style pages that associated to the URLs coming from the cloudflare API, in a persisting manner
