@@ -30,7 +30,7 @@ The recently launched [`wrangler dev`](https://github.com/cloudflare/wrangler#-d
 
 Note that a major benefit of using `wrangler dev` is the ability to output `console.log` statements to your terminal - this is super useful for inspecting HTTP responses and variables!
 
-### 3.
+### 3. Go to `https://zhe-xu-cloudflare-project.zhespace.workers.dev/` or locally `http://localhost:8787/` after running `wrangler dev`
 
 #### First page: Functioning like a welcome/main page, which inform users which URL/API we are fetching data from
 
