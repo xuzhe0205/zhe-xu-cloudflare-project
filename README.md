@@ -32,6 +32,8 @@ Note that a major benefit of using `wrangler dev` is the ability to output `cons
 
 ### 3. Go to `https://zhe-xu-cloudflare-project.zhespace.workers.dev/` or locally `http://localhost:8787/` after running `wrangler dev`
 
+(Network connection might affect the loading of these images, if so, you can try to take a look at the regarding images by going in to raw file of this README, and navigate through the related links)
+
 #### First page: Functioning like a welcome/main page, which inform users which URL/API we are fetching data from
 
 ![First page](https://drive.google.com/uc?export=view&id=1LvJB84KfEttbeYCbh353UPddzOKmAlCR)
